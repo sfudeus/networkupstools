@@ -17,6 +17,8 @@ ENV API_USER=upsmon \
 RUN dnf update -y && \
     dnf install -y nut
 
+RUN mkdir -p /etc/nut/local
+
 EXPOSE 3493
 COPY entrypoint.sh /usr/local/bin/
 ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]

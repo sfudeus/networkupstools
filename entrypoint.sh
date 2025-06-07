@@ -1,14 +1,14 @@
 #! /bin/sh -e
 
-if [ -d /run/secrets ] && [ -s /run/secrets/$SECRETNAME ]; then
-  API_PASSWORD=$(cat /run/secrets/$SECRETNAME)
+if [ -d /run/secrets ] && [ -s "/run/secrets/$SECRETNAME" ]; then
+  API_PASSWORD=$(cat "/run/secrets/$SECRETNAME")
 fi
 
 if [ ! -e /etc/nut/.setup ]; then
   if [ -e /etc/nut/local/ups.conf ]; then
     cp /etc/nut/local/ups.conf /etc/nut/ups.conf
   else
-    if [ -z "$SERIAL" ] && [ $DRIVER = usbhid-ups ] ; then
+    if [ -z "$SERIAL" ] && [ "$DRIVER" = usbhid-ups ] ; then
       echo "** This container may not work without setting for SERIAL **"
     fi
     cat <<EOF >>/etc/nut/ups.conf
@@ -17,20 +17,20 @@ if [ ! -e /etc/nut/.setup ]; then
         port = $PORT
         desc = "$DESCRIPTION"
 EOF
-    if [ ! -z "$SERIAL" ]; then
+    if [ -n "$SERIAL" ]; then
       echo "        serial = \"$SERIAL\"" >> /etc/nut/ups.conf
     fi
-    if [ ! -z "$POLLINTERVAL" ]; then
+    if [ -n "$POLLINTERVAL" ]; then
       echo "        pollinterval = $POLLINTERVAL" >> /etc/nut/ups.conf
     fi
-    if [ ! -z "$VENDORID" ]; then
+    if [ -n "$VENDORID" ]; then
       echo "        vendorid = $VENDORID" >> /etc/nut/ups.conf
     fi
-    if [ ! -z "$SDORDER" ]; then
+    if [ -n "$SDORDER" ]; then
       echo "        sdorder = $SDORDER" >> /etc/nut/ups.conf
     fi
   fi
-  if [ "$MAXAGE" -ne 15 ]; then
+  if [ "${MAXAGE:-15}" -ne 15 ]; then
       sed -i -e "s/^[# ]*MAXAGE [0-9]\+/MAXAGE $MAXAGE/" /etc/nut/upsd.conf
   fi
   if [ -e /etc/nut/local/upsd.conf ]; then
@@ -60,15 +60,15 @@ EOF
   touch /etc/nut/.setup
 fi
 
-chgrp $GROUP /etc/nut/*
+chgrp "$GROUP" /etc/nut/*
 chmod 640 /etc/nut/*
 mkdir -p -m 2750 /dev/shm/nut
-chown $USER:$GROUP /dev/shm/nut
+chown "$USER:$GROUP" /dev/shm/nut
 [ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run
 # Issue #15 - change pid warning message from "No such file" to "Ignoring"
-echo 0 > /var/run/nut/upsd.pid && chown $USER:$GROUP /var/run/nut/upsd.pid
+echo 0 > /var/run/nut/upsd.pid && chown "$USER:$GROUP" /var/run/nut/upsd.pid
 echo 0 > /var/run/upsmon.pid
 
 /usr/sbin/upsdrvctl -u root start
-/usr/sbin/upsd -u $USER
+/usr/sbin/upsd -u "$USER"
 exec /usr/sbin/upsmon -D
