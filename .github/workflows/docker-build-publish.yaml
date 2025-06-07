@@ -11,3 +11,5 @@ jobs:
   build:
     uses: sfudeus/workflows/.github/workflows/docker-build-publish-branch.yaml@main
     secrets: inherit
+    with:
+      platforms: linux/amd64,linux/arm64/v8

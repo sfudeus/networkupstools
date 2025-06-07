@@ -11,3 +11,4 @@ jobs:
     secrets: inherit
     with:
       tag: preview-${{ github.event.number }}
+      platforms: linux/amd64,linux/arm64/v8
