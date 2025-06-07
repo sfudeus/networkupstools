@@ -2,6 +2,7 @@ FROM docker.io/library/fedora:42
 
 ENV API_USER=upsmon \
     API_PASSWORD= \
+    BASEDIR=/etc/ups \
     DESCRIPTION=UPS \
     DRIVER=usbhid-ups \
     GROUP=nut \
