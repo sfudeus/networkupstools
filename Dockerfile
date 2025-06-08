@@ -20,7 +20,7 @@ ENV API_USER=upsmon \
     VENDORID=
 
 RUN dnf update -y && \
-    dnf install -y nut
+    dnf install -y nut util-linux
 
 EXPOSE 3493
 COPY entrypoint.sh /usr/local/bin/
