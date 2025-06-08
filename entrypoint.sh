@@ -1,19 +1,21 @@
 #! /bin/sh -e
 
+# adapted from https://github.com/instantlinux/docker-tools/tree/main/images/nut-upsd
+
 BASEDIR=${BASEDIR:-/etc/ups}
 
 if [ -d /run/secrets ] && [ -s "/run/secrets/$SECRETNAME" ]; then
   API_PASSWORD=$(cat "/run/secrets/$SECRETNAME")
 fi
 
-if [ ! -e $BASEDIR/.setup ]; then
-  if [ -e $BASEDIR/local/ups.conf ]; then
-    cp $BASEDIR/local/ups.conf $BASEDIR/ups.conf
+if [ ! -e "$BASEDIR/.setup" ]; then
+  if [ -e "$BASEDIR/local/ups.conf" ]; then
+    cp "$BASEDIR/local/ups.conf" "$BASEDIR/ups.conf"
   else
     if [ -z "$SERIAL" ] && [ "$DRIVER" = usbhid-ups ] ; then
       echo "** This container may not work without setting for SERIAL **"
     fi
-    cat <<EOF >>$BASEDIR/ups.conf
+    cat <<EOF >>"$BASEDIR/ups.conf"
 [$NAME]
         driver = $DRIVER
         port = $PORT
@@ -33,37 +35,37 @@ EOF
     fi
   fi
   if [ "${MAXAGE:-15}" -ne 15 ]; then
-      sed -i -e "s/^[# ]*MAXAGE [0-9]\+/MAXAGE $MAXAGE/" $BASEDIR/upsd.conf
+      sed -i -e "s/^[# ]*MAXAGE [0-9]\+/MAXAGE $MAXAGE/" "$BASEDIR/upsd.conf"
   fi
   if [ -e $BASEDIR/local/upsd.conf ]; then
-    cp $BASEDIR/local/upsd.conf $BASEDIR/upsd.conf
+    cp "$BASEDIR/local/upsd.conf" "$BASEDIR/upsd.conf"
   else
-    cat <<EOF >>$BASEDIR/upsd.conf
+    cat <<EOF >>"$BASEDIR/upsd.conf"
 LISTEN 0.0.0.0
 EOF
   fi
-  if [ -e $BASEDIR/local/upsd.users ]; then
-    cp $BASEDIR/local/upsd.users $BASEDIR/upsd.users
+  if [ -e "$BASEDIR/local/upsd.users" ]; then
+    cp "$BASEDIR/local/upsd.users" "$BASEDIR/upsd.users"
   else
-    cat <<EOF >>$BASEDIR/upsd.users
+    cat <<EOF >>"$BASEDIR/upsd.users"
 [$API_USER]
         password = $API_PASSWORD
         upsmon $SERVER
 EOF
   fi
-  if [ -e $BASEDIR/local/upsmon.conf ]; then
-    cp $BASEDIR/local/upsmon.conf $BASEDIR/upsmon.conf
+  if [ -e "$BASEDIR/local/upsmon.conf" ]; then
+    cp "$BASEDIR/local/upsmon.conf" "$BASEDIR/upsmon.conf"
   else
-    cat <<EOF >>$BASEDIR/upsmon.conf
+    cat <<EOF >>"$BASEDIR/upsmon.conf"
 MONITOR $NAME@localhost 1 $API_USER $API_PASSWORD $SERVER
 RUN_AS_USER $USER
 EOF
   fi
-  touch $BASEDIR/.setup
+  touch "$BASEDIR/.setup"
 fi
 
-chgrp "$GROUP" $BASEDIR/*
-chmod 640 $BASEDIR/*
+chgrp "$GROUP" "$BASEDIR"/*
+chmod 640 "$BASEDIR"/*
 mkdir -p -m 2750 /dev/shm/nut
 chown "$USER:$GROUP" /dev/shm/nut
 [ -e /var/run/nut ] || ln -s /dev/shm/nut /var/run

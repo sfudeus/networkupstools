@@ -1,5 +1,7 @@
 FROM docker.io/library/fedora:42
 
+# adated from https://github.com/instantlinux/docker-tools/tree/main/images/nut-upsd
+
 ENV API_USER=upsmon \
     API_PASSWORD= \
     BASEDIR=/etc/ups \
