@@ -1,4 +1,4 @@
-FROM docker.io/library/fedora:42
+FROM docker.io/library/fedora:43
 
 # adated from https://github.com/instantlinux/docker-tools/tree/main/images/nut-upsd
 
